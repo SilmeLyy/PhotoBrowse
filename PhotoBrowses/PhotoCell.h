@@ -15,13 +15,13 @@
 //一张图片显示的控件
 @class PhotoItem;
 @interface PhotoCell : UIScrollView 
-
+//图片模型
 @property (nonatomic , strong)PhotoItem *item;
-
+//原图片父控件
 @property (nonatomic , strong)UIView *imageContainerView;
-
+//图片控件
 @property (nonatomic , strong)UIImageView *imageView;
-
+//进度
 @property (nonatomic, strong) CAShapeLayer *progressLayer;
 
 @end

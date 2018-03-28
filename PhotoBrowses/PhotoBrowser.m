@@ -10,14 +10,16 @@
 #import "PhotoCell.h"
 
 @interface PhotoBrowser()<UIScrollViewDelegate>
-
+@property (nonatomic , strong)UIView *superNavView;
 @property (nonatomic, weak) UIView *fromView;
 @property (nonatomic, weak) UIView *toContainerView;
-
+//隐藏前的快照
 @property (nonatomic, strong) UIImage *snapshotImage;
+//隐藏后的快照
 @property (nonatomic, strong) UIImage *snapshorImageHideFromView;
-
+//背景
 @property (nonatomic, strong) UIImageView *background;
+//毛玻璃效果
 @property (nonatomic, strong) UIImageView *blurBackground;
 
 @property (nonatomic , strong)UIScrollView *scrollView;
@@ -25,15 +27,19 @@
 
 @property (nonatomic, assign) BOOL isPresented;
 @property (nonatomic , copy)complete success;
+//删除按钮
 @property (nonatomic , strong)UIButton *deleteBtn;
+//确认按钮
 @property (nonatomic , strong)UIButton *trueBtn;
 
 @property (nonatomic , strong)UIView *btnView;
-
+//拖拽手势
 @property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
+//拖拽开始位置
 @property (nonatomic, assign) CGPoint panGestureBeginPoint;
-
+//当前的是第几个
 @property (nonatomic , assign)NSInteger currIndex;
+//点第几个打开的
 @property (nonatomic , assign)NSInteger fromeIndex;
 
 @property (nonatomic , strong)NSMutableArray *cells;
@@ -208,7 +214,7 @@
         fromView.hidden = YES;
         _snapshorImageHideFromView = [self snapshotImageWithView:superViews];
         fromView.hidden = fromViewHidden;
-//        _background.image = _snapshorImageHideFromView;
+        _background.image = _snapshorImageHideFromView;
         
         PhotoCell *cell = _cells[index];
         CGRect fromFrame = [_fromView convertRect:_fromView.bounds toView:cell.imageContainerView];
@@ -226,7 +232,7 @@
             cell.imageView.frame = cell.imageContainerView.bounds;
             [cell.imageView.layer setValue:@(1.01) forKey:@"transform.scale"];
         }completion:^(BOOL finished) {
-            [UIView animateWithDuration:oneTime delay:0 options:UIViewAnimationOptionBeginFromCurrentState|UIViewAnimationOptionCurveEaseInOut animations:^{
+            [UIView animateWithDuration:oneTime delay:0 options:UIViewAnimationOptionBeginFromCurrentState |UIViewAnimationOptionCurveEaseInOut animations:^{
                 [cell.imageView.layer setValue:@(1.0) forKey:@"transform.scale"];
                 _pagecontrol.alpha = 1;
             }completion:^(BOOL finished) {
@@ -236,7 +242,10 @@
             }];
         }];
     }
-    [superViews addSubview:self];
+    _superNavView = superViews;
+//    [superViews addSubview:self];
+    UIWindow *window = [UIApplication sharedApplication].keyWindow;
+    [window addSubview:self];
 }
 
 - (void)disMiss{
@@ -415,6 +424,9 @@
     _currIndex = index;
     _pagecontrol.currentPage = index;
     PhotoItem *item = _photoItems[index];
+    item.thumbView.hidden = true;
+    _background.image = [self snapshotImageWithView:_superNavView];
+    item.thumbView.hidden = false;
     if (item.isEdit) {//可以编辑
         self.deleteBtn.hidden = false;
         self.trueBtn.hidden = false;
@@ -426,7 +438,7 @@
 }
 
 - (UIImage *)snapshotImageAfterScreenUpdates:(BOOL)afterUpdates andView:(UIView *)superView {
- UIGraphicsBeginImageContextWithOptions(superView.bounds.size, superView.opaque, 0);
+    UIGraphicsBeginImageContextWithOptions(superView.bounds.size, superView.opaque, 0);
     [superView drawViewHierarchyInRect:superView.bounds afterScreenUpdates:afterUpdates];
     UIImage *snap = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
